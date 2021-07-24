@@ -1,0 +1,51 @@
+use('tareaAnalisisConsulta')
+
+//a
+
+db.facturacion.createIndex({ "documentoFactura.fechaFactura": 1 })
+
+db.facturacion.explain("executionStats").aggregate([
+    { $match: { 'documentoFactura.fechaFactura': { $gte: ISODate("2016-03-01T00:00:00Z"), $lte: ISODate("2017-08-01T00:00:00Z" ) } } },
+    
+    {
+    $sort: {
+      'documentoFactura.fechaFactura': -1
+    }}
+
+] )
+
+
+// b
+
+db.facturacion.createIndex({ "documentoFactura.ciudadFactura": 1})
+
+db.facturacion.explain("executionStats").aggregate([
+    { $sort : { "documentoFactura.ciudadFactura" : 1} },
+    { $group : { _id : "$documentoFactura.ciudadFactura", totalSaleAmount: { $sum: "$documentoFactura.totalFactura" } } }
+
+] )
+
+// c
+
+
+db.facturacion.createIndex({ "documentoFactura.ciudadDespacho": 1})
+
+db.facturacion.explain("executionStats").aggregate([
+    { $match: { $or: [ { 'documentoFactura.ciudadDespacho': "SANTIAGO"}, {'documentoFactura.ciudadDespacho': "LA VEGA" } ] } },
+    { $project: { 'documentoFactura.codigoFactura': 1, 'documentoFactura.codigoCliente': 1, 'documentoFactura.ciudadFactura': 1, 'documentoFactura.ciudadDespacho': 1 } }
+
+] )
+
+// d
+
+db.facturacion.createIndex({ "documentoFactura.fechaFactura": 1 })
+
+db.facturacion.explain("executionStats").aggregate([
+    { $match: { 'documentoFactura.fechaFactura': { $gte: ISODate("2016-03-01T00:00:00Z"), $lte: ISODate("2017-08-01T00:00:00Z" ) } } },
+    
+    {
+    $sort: {
+      'documentoFactura.fechaFactura': -1
+    }}
+
+], { "allowDiskUse" : true } )
